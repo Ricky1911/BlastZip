@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlastZip", "BlastZip\BlastZip.csproj", "{58E7B06C-E58D-4B43-BF88-7E6A82D1659F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{58E7B06C-E58D-4B43-BF88-7E6A82D1659F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58E7B06C-E58D-4B43-BF88-7E6A82D1659F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58E7B06C-E58D-4B43-BF88-7E6A82D1659F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58E7B06C-E58D-4B43-BF88-7E6A82D1659F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6790BC5E-0C77-4135-A833-E1C4B4000A7A}
+	EndGlobalSection
+EndGlobal
