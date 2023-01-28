@@ -6,7 +6,7 @@ BlastZip <-f ZipPath> [OutputPath] [-t MaxLength | -q | -p PayloadPath] [--log L
 
 运行完毕后在log文件中寻找"result: password"即为爆破的结果
 
--t MaxLength 为指定最大长度的爆破
+-t 为指定最大长度的爆破
 
 -q 为最大长度为6的爆破
 
