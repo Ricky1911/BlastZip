@@ -1,8 +1,7 @@
 {
   "profiles": {
     "BlastZip": {
-      "commandName": "Project",
-      "commandLineArgs": "-f C:\\Users\\86139\\Downloads\\铃丨Y户缔.zip \r\n-p C:\\Users\\86139\\Desktop\\1.txt"
+      "commandName": "Project"
     }
   }
 }

@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using ICSharpCode.SharpZipLib.Zip;
+using System.Text;
 
 class Progaram
 {
@@ -9,7 +10,7 @@ class Progaram
     {
         if (args.Length == 0)
         {
-            Console.WriteLine("Use command \"BlastZip <-f ZipPath> [OutputPath] [-t maxlength | -q | -p PayloadPath] [--log LogPath]\" to find the password of a zip file");
+            Console.WriteLine("Use command \"BlastZip <-f ZipPath> [OutputPath] [-t MaxLength | -q | -p PayloadPath] [--log LogPath]\" to find the password of a zip file");
             return;
         }
         if (args[0] == "-f")
@@ -83,7 +84,7 @@ class BlastZip
     private string _outputPath;
     private string _logPath;
     private bool _exitFlag = false;
-    private ZipFile _zipFile;
+    private ZipFile? _zipFile;
 
     public BlastZip(string filePath, string outputPath, string logPath)
     {
@@ -103,10 +104,9 @@ class BlastZip
                     Console.WriteLine(entry.Name);
                 }
             }
-            catch (ZipException e)
+            catch (ZipException)
             {
                 Console.WriteLine("Not A Zip File");
-                throw e;
             }
         }
         else
@@ -119,7 +119,14 @@ class BlastZip
     public bool TestPassword(string password)
     {
         Console.WriteLine(password);
-        return Unzip.UnzipFile(_filePath, _outputPath, password);
+        bool result = Unzip.UnzipFile(_filePath, _outputPath, password);
+        if (result)
+        {
+            Console.WriteLine("Success");
+            File.AppendAllText(_logPath, "result:" + password + "\n");
+            _exitFlag = true;
+        }        
+        return result;
     }
     //测试定长密码
     public bool TestWithLength(int length)
@@ -127,10 +134,7 @@ class BlastZip
         if (length <= 0) return false;
         for (int i = 0; i < (int)Math.Pow((double)10, (double)length); i++)
         {
-            if (_exitFlag)
-            {
-                return false;
-            }
+            if (_exitFlag) return false;
             string password = "";
             for (int count = 0; count < length - i.ToString().Length; count++)
             {
@@ -138,18 +142,14 @@ class BlastZip
             }
             password += i.ToString();
             bool result = TestPassword(password);
-            if (result)
-            {
-                File.AppendAllText(_logPath, "result:" + i.ToString() + "\n");
-                _exitFlag = true;
-                return true;
-            }
+            if (result) return true;
         }
         return false;
     }
 
     public void Run(int length)
     {
+        if (_exitFlag) return;
         for (int i = 1; i <= length; i++)
         {
             TestWithLength(i);
@@ -158,17 +158,30 @@ class BlastZip
 
     public void Run(string? _payloadPath)
     {
+        if (_exitFlag) return;
         if (File.Exists(_payloadPath))
         {
-            string[] payloads = File.ReadAllLines(_payloadPath);
-            foreach (string payload in payloads)
-            {
-                TestPassword(payload);
-            }
+            string[] payloads = File.ReadAllLines(_payloadPath,Encoding.UTF8);
+            foreach (string payload in payloads) TestPassword(payload);
         }
         else
         {
-            Run(8);
+            if (Directory.Exists(_payloadPath))
+            {
+                DirectoryInfo di = new DirectoryInfo(_payloadPath);
+                foreach (DirectoryInfo directory in di.GetDirectories())
+                {
+                    Run(directory.FullName);
+                }
+                foreach (FileInfo file in di.GetFiles())
+                {
+                    if (file.Extension == ".txt") Run(file.FullName);
+                }
+                
+                /*foreach (DirectoryInfo directory in di.GetDirectories())
+                    Run(directory.FullName);*/
+            }
+            else Run(8);
         }
     }
 }
@@ -178,18 +191,14 @@ class Unzip
     public static bool UnzipFile(string _filePath, string _outputPath, string? _password = null)
     {
         if (string.IsNullOrEmpty(_filePath) || string.IsNullOrEmpty(_outputPath))
-        {
             return false;
-        }
         Stream _inputSteam = File.OpenRead(_filePath);
         return UnzipFile(_inputSteam, _outputPath, _password);
     }
     public static bool UnzipFile(Stream _inputStream, string _outputPath, string? _password = null)
     {
         if ((null == _inputStream) || string.IsNullOrEmpty(_outputPath))
-        {
             return false;
-        }
 
         // 创建文件目录
         if (!Directory.Exists(_outputPath))
@@ -208,9 +217,7 @@ class Unzip
         while (null != (entry = _inputStream.GetNextEntry()))
         {
             if (string.IsNullOrEmpty(entry.Name))
-            {
                 continue;
-            }
 
             string filePathName = Path.Combine(_outputPath, entry.Name);
             // 创建文件目录
@@ -233,10 +240,7 @@ class Unzip
 
                         if (count > 0)
                             fileStream.Write(bytes, 0, count);
-                        else
-                        {
-                            break;
-                        }
+                        else break;
                     }
                 }
             }
@@ -251,9 +255,7 @@ class Unzip
             catch (System.Exception _e)
             {
                 if (logPath != null)
-                {
                     File.AppendAllTextAsync(logPath, "error:" + _password + "\n");
-                }
                 Console.WriteLine("[ZipUtility.UnzipFile]: " + _e.ToString());
                 return false;
             }
