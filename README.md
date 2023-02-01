@@ -22,4 +22,4 @@ BlastZip <-f ZipPath> [OutputPath] [-t MaxLength | -q | -p PayloadPath] [--log L
 
 目前部分密码尝试时可能出现不明原因报错，大部分是由于密码错误，但是尚未经过一一确认，故将产生报错时尝试的密码一并写入log文件，为"error: password"
 
-目前只使用了单线程进行爆破，因本人水平有限，多线程性能过低
+目前使用10个线程同时进行爆破
