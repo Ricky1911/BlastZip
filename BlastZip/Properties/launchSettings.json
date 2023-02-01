@@ -1,7 +1,8 @@
 {
   "profiles": {
     "BlastZip": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "-f C:\\Users\\86139\\Downloads\\腾讯会议图片_20230122205745.zip\r\n-t 6"
     }
   }
 }

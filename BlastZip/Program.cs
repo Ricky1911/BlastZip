@@ -80,6 +80,7 @@ class Progaram
 
 class BlastZip
 {
+    public int maxThreads = 10;
     private string _filePath;
     private string _outputPath;
     private string _logPath;
@@ -123,28 +124,44 @@ class BlastZip
         if (result)
         {
             Console.WriteLine("Success");
-            File.AppendAllText(_logPath, "result:" + password + "\n");
+            Log("result: " + password);
             _exitFlag = true;
-        }        
+        }
         return result;
     }
     //测试定长密码
     public bool TestWithLength(int length)
     {
         if (length <= 0) return false;
-        for (int i = 0; i < (int)Math.Pow((double)10, (double)length); i++)
+        if (_exitFlag) return false;
+        List<Thread> threads = new List<Thread>();
+        int sliceLength = (int)Math.Pow((double)10, (double)length) / maxThreads;
+        Console.WriteLine("slice:" + sliceLength);
+        for (int i = 0; i < maxThreads; i++)
         {
             if (_exitFlag) return false;
-            string password = "";
-            for (int count = 0; count < length - i.ToString().Length; count++)
+            int min;
+            int max;
+            if (i == maxThreads - 1)
             {
-                password += "0";
+                min = sliceLength * i;
+                max = (int)Math.Pow((double)10, (double)length) - 1;
             }
-            password += i.ToString();
-            bool result = TestPassword(password);
-            if (result) return true;
+            else
+            {
+                min = sliceLength * i;
+                max = sliceLength * (i + 1) - 1;  
+            }
+            Thread thread = new Thread(() =>
+            {
+                TestInRange(min, max, length);
+            });
+            threads.Add(thread);
+            thread.Start();
         }
-        return false;
+        threads.ForEach((Thread thread) => { thread.Join(); });
+        if (_exitFlag) return true;
+        else return false;
     }
 
     public void Run(int length)
@@ -152,6 +169,7 @@ class BlastZip
         if (_exitFlag) return;
         for (int i = 1; i <= length; i++)
         {
+            if(_exitFlag) return;
             TestWithLength(i);
         }
     }
@@ -177,12 +195,39 @@ class BlastZip
                 {
                     if (file.Extension == ".txt") Run(file.FullName);
                 }
-                
-                /*foreach (DirectoryInfo directory in di.GetDirectories())
-                    Run(directory.FullName);*/
             }
             else Run(8);
         }
+    }
+
+    private string PadToLength(string password, int length)
+    {
+        if (password.Length >= length) return password;
+        string ret = "";
+        for (int count = 0; count < length - password.Length; count++)
+        {
+            ret += "0";
+        }
+        ret += password;
+        return ret;
+    }
+
+    private bool TestInRange(int min, int max, int length)
+    {
+        if (_exitFlag) return false;
+        if (min > max) return false;
+        for (int i = min; i <= max; i++)
+        {
+            if (_exitFlag) return false;
+            bool result = TestPassword(PadToLength(i.ToString(), length));
+            if (result) return true;
+        }
+        return false;
+    }
+
+    private void Log(string message)
+    {
+        File.AppendAllTextAsync(_logPath, message + "\n");
     }
 }
 class Unzip
